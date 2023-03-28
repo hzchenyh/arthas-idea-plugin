@@ -18,7 +18,8 @@ public interface ArthasCommandConstants {
     /**
      * arthas 热更新 基础包名称
      */
-    String HOT_SWAMP_BASH_PACKAGE_PATH = "$HOME/opt/arthas/hotSwap/classes";
+    //String HOT_SWAMP_BASH_PACKAGE_PATH = "$HOME/opt/arthas/hotSwap/classes";
+    String HOT_SWAMP_BASH_PACKAGE_PATH = "/tmp/classes";
 
     /**
      * 默认条件表达式
