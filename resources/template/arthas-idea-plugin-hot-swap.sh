@@ -127,7 +127,7 @@ select_pid() {
     fi
   done
   echo " "
-  echo "$(echo $(tput setaf 1) 请手动选择进程或者idea 预先配置jps -l 工程名称自动执行$(tput sgr0))"
+  echo "$(echo  请手动选择进程或者idea 预先配置jps -l 工程名称自动执行)"
   echo " "
 
   read choice
@@ -144,7 +144,7 @@ banner_simple() {
   local msg="* $* *"
   local edge=$(echo "$msg" | sed 's/./*/g')
   echo "$edge"
-  echo "$(tput bold)$msg$(tput sgr0)"
+  echo "$msg"
   echo "$edge"
   echo
 }
@@ -152,7 +152,7 @@ banner_simple() {
 # $1 : err_code
 # $2 : err_msg
 exit_on_err() {
-  [[ ! -z "${2}" ]] && banner_simple $(echo $(tput setaf 1)${2} $(tput sgr0)) 1>&2
+  [[ ! -z "${2}" ]] && banner_simple $(echo ${2} ) 1>&2
   exit ${1}
 }
 
@@ -180,9 +180,9 @@ installArthas() {
     local temp_target_lib_zip="$HOME/opt/arthas/arthas-packaging-latest-version-bin.zip"
     echo "arthas idea plugin download arthas zip package ${temp_target_lib_zip} download url=${ARTHAS_PACKAGE_ZIP_DOWNLOAD_URL}"
     echo " "
-    echo "$(echo $(tput setaf 1)如果网络无法访问 https://arthas.aliyun.com/download/latest_version?mirror=aliyun $(tput sgr0))"
-    echo "$(echo $(tput setaf 1)idea设置网络可以访问的arthas 完整zip包的下载地址 或者直接下载解压到服务器 $HOME/opt/arthas 目录 $(tput sgr0))"
-    echo "$(echo $(tput setaf 1)如果配置的是oss 存储,arthas 命令 other分组下面 Local File Upload To Oss命令可以上传文件 有效期1年,配置到arthas zip包地址$(tput sgr0))"
+    echo "$(echo 如果网络无法访问 https://arthas.aliyun.com/download/latest_version?mirror=aliyun )"
+    echo "$(echo idea设置网络可以访问的arthas 完整zip包的下载地址 或者直接下载解压到服务器 $HOME/opt/arthas 目录 )"
+    echo "$(echo 如果配置的是oss 存储,arthas 命令 other分组下面 Local File Upload To Oss命令可以上传文件 有效期1年,配置到arthas zip包地址)"
     echo " "
     curl  -Lk "${ARTHAS_PACKAGE_ZIP_DOWNLOAD_URL}" -o  "${temp_target_lib_zip}" || retrun 1
     cd "$HOME/opt/arthas" && unzip -o "${temp_target_lib_zip}"
@@ -204,15 +204,15 @@ decodebase64CLassFile() {
 # Usage: doStarteRedefine
 doStarteRedefine() {
   createFile $HOME/opt/arthas/hotSwapResult.out
-  echo $(tput bold)"arthas start command :$HOME/opt/arthas/as.sh --select ${SELECT_VALUE}  -c \"${arthasIdeaPluginRedefineCommand}\"  | tee $HOME/opt/arthas/hotSwapResult.out"$(tput sgr0)
-  $HOME/opt/arthas/as.sh --select ${SELECT_VALUE} -c "${arthasIdeaPluginRedefineCommand}" | tee $HOME/opt/arthas/hotSwapResult.out
+  echo "arthas start command :java -jar /home/docker/java-agent/arthas/lib/3.6.1/arthas/arthas-boot.jar --select start.jar  -c \"${arthasIdeaPluginRedefineCommand}\"  | tee $HOME/opt/arthas/hotSwapResult.out"
+  java -jar /home/docker/java-agent/arthas/lib/3.6.1/arthas/arthas-boot.jar --select start.jar -c "${arthasIdeaPluginRedefineCommand}" | tee $HOME/opt/arthas/hotSwapResult.out
 }
 
 redefineResult() {
   cat $HOME/opt/arthas/hotSwapResult.out
   redefineResult=$(cat $HOME/opt/arthas/hotSwapResult.out | grep -E "retransform success|redefine success")
   if [ -z "$redefineResult" ]; then
-    banner_simple $(echo $(tput setaf 1)arthas idea plugin hot swap error $(tput sgr0))
+    banner_simple $(echo arthas idea plugin hot swap error )
     exit 1
   else
     banner_simple "arthas idea plugin hot swap class success"
@@ -234,25 +234,26 @@ main() {
 
   check_permission
 
-  installArthas
-  if [ $? -ne 0 ]; then
-    exit_on_err 1 "arthas install as.sh script error"
-  fi
+#  installArthas
+#  if [ $? -ne 0 ]; then
+#    exit_on_err 1 "arthas install as.sh script error"
+#  fi
 
   decodebase64CLassFile
   if [ $? -ne 0 ]; then
     exit_on_err 1 "arthas idea plugin decodebase64CLass error"
   fi
+#
 
-  if [ -z ${SELECT_VALUE} ]; then
-    reset_for_env
-    select_pid
-    SELECT_VALUE=${TARGET_PID}
-  fi
+# if [ -z ${SELECT_VALUE} ]; then
+#    reset_for_env
+#    select_pid
+#    SELECT_VALUE=${TARGET_PID}
+#  fi
 
-  if [ -z ${SELECT_VALUE} ]; then
-    exit_on_err 1 "select target process by classname or JARfilename Target pid is empty"
-  fi
+ # if [ -z ${SELECT_VALUE} ]; then
+ #   exit_on_err 1 "select target process by classname or JARfilename Target pid is empty"
+ # fi
 
   doStarteRedefine
 
